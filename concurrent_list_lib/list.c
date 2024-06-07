@@ -75,8 +75,8 @@ void putItem(TList *lst, void *itm) {
     lst->last = node;
     lst->num_of_elements++;
 
-    pthread_mutex_unlock(&lst->mutex);
     pthread_cond_signal(&lst->cempty);
+    pthread_mutex_unlock(&lst->mutex);
 }
 
 void showList(TList *lst) {
@@ -97,11 +97,11 @@ void setMaxSize(TList *lst, int s) {
     int prev = lst->capacity;
     lst->capacity = s;
 
-    pthread_mutex_unlock(&lst->mutex);
-    
     if (prev < s) {
         pthread_cond_broadcast(&lst->cfull);
     }
+    
+    pthread_mutex_unlock(&lst->mutex);
 }
 
 int getCount(TList *lst) {
@@ -152,8 +152,8 @@ void *getItem(TList *lst) {
 
     lst->num_of_elements--;
 
-    pthread_mutex_unlock(&lst->mutex);
     pthread_cond_signal(&lst->cfull);
+    pthread_mutex_unlock(&lst->mutex);
 
     void *item = node->mem_ptr;
     free(node);
@@ -178,8 +178,8 @@ void *popItem(TList *lst) {
 
     lst->num_of_elements--;
 
-    pthread_mutex_unlock(&lst->mutex);
     pthread_cond_signal(&lst->cfull);
+    pthread_mutex_unlock(&lst->mutex);
 
     void *item = node->mem_ptr;
     free(node);
@@ -212,8 +212,8 @@ int removeItem(TList *lst, void *itm) {
         
         lst->num_of_elements--;
 
-        pthread_mutex_unlock(&lst->mutex);
         pthread_cond_signal(&lst->cfull);
+        pthread_mutex_unlock(&lst->mutex);
 
         free(node->mem_ptr);
         free(node);
@@ -251,8 +251,8 @@ void appendItems(TList *lst, TList *lst2) {
 
     lst2->num_of_elements = 0;
 
-    pthread_mutex_unlock(&secondList->mutex);
-    pthread_mutex_unlock(&firstList->mutex);
     pthread_cond_broadcast(&lst->cempty);
     pthread_cond_broadcast(&lst2->cfull);
+    pthread_mutex_unlock(&secondList->mutex);
+    pthread_mutex_unlock(&firstList->mutex);
 }
